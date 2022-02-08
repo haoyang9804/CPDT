@@ -31,9 +31,13 @@ Eval simpl in expDenote (Binop Plus (Const 2) (Const 2)).
 Eval simpl in expDenote (Binop Times (Binop Plus (Const 2) (Const 2)) (Const 7)).
 (** [= 28 : nat] *)
 
-Inductive instr : Set :=
+(* Inductive instr : Set :=
 | iConst : nat -> instr
-| iBinop : binop -> instr.
+| iBinop : binop -> instr. *)
+
+Inductive instr : Set :=
+| iConst (n:nat)
+| iBinop (b:binop).
 
 Definition prog := list instr.
 Definition stack := list nat.
@@ -127,6 +131,7 @@ Check app_nil_end.
   reflexivity.
 Qed.
 
+
 Inductive type : Set := Nat | Bool.
 
 Inductive tbinop : type -> type -> type -> Set :=
@@ -156,12 +161,18 @@ Definition tbinopDenote arg1 arg2 res (b : tbinop arg1 arg2 res)
     | TLt => leb
   end.
 
+Check tbinopDenote.
+
 Fixpoint texpDenote t (e : texp t) : typeDenote t :=
   match e with
     | TNConst n => n
     | TBConst b => b
-    | TBinop _ _ _ b e1 e2 => (tbinopDenote b) (texpDenote e1) (texpDenote e2)
+    | TBinop arg1 arg2 res b e1 e2 => (tbinopDenote b) (texpDenote e1) (texpDenote e2)
   end.
+
+Check texpDenote.
+Check 3 : typeDenote Nat.
+Check 3 : nat.
 
 Eval simpl in texpDenote (TNConst 42).
 (** [= 42 : typeDenote Nat] *)
@@ -187,11 +198,17 @@ Eval simpl in texpDenote (TBinop TLt (TBinop TPlus (TNConst 2) (TNConst 2))
 Definition tstack := list type.
 
 Inductive tinstr : tstack -> tstack -> Set :=
+| TiNConst (s : tstack) (nat : nat) : tinstr s (Nat :: s)
+| TiBConst (s : tstack) (bool : bool) : tinstr s (Bool :: s)
+| TiBinop arg1 arg2 res s : tbinop arg1 arg2 res ->
+  tinstr (arg1 :: arg2 :: s) (res :: s).
+
+(* Inductive tinstr : tstack -> tstack -> Set :=
 | TiNConst : forall s, nat -> tinstr s (Nat :: s)
 | TiBConst : forall s, bool -> tinstr s (Bool :: s)
 | TiBinop : forall arg1 arg2 res s,
   tbinop arg1 arg2 res
-  -> tinstr (arg1 :: arg2 :: s) (res :: s).
+  -> tinstr (arg1 :: arg2 :: s) (res :: s). *)
 
 Inductive tprog : tstack -> tstack -> Set :=
 | TNil : forall s, tprog s s
@@ -200,12 +217,13 @@ Inductive tprog : tstack -> tstack -> Set :=
   -> tprog s2 s3
   -> tprog s1 s3.
 
-
 Fixpoint vstack (ts : tstack) : Set :=
   match ts with
     | nil => unit
     | t :: ts' => typeDenote t * vstack ts'
   end%type.
+
+Print unit.
 
 Definition tinstrDenote ts ts' (i : tinstr ts ts') : vstack ts -> vstack ts' :=
   match i with
@@ -214,6 +232,8 @@ Definition tinstrDenote ts ts' (i : tinstr ts ts') : vstack ts -> vstack ts' :=
     | TiBinop _ _ _ _ b => fun s =>
       let '(arg1, (arg2, s')) := s in
         ((tbinopDenote b) arg1 arg2, s')
+    (* | TiBinop _ _ _ _ b => fun arg1 => fun arg2 => fun s' =>
+      ((tbinopDenote b) arg1 arg2, s') *)
   end.
 
 Fixpoint tprogDenote ts ts' (p : tprog ts ts') : vstack ts -> vstack ts' :=
