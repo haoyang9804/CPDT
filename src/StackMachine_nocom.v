@@ -197,18 +197,18 @@ Eval simpl in texpDenote (TBinop TLt (TBinop TPlus (TNConst 2) (TNConst 2))
 
 Definition tstack := list type.
 
-Inductive tinstr : tstack -> tstack -> Set :=
+(* Inductive tinstr : tstack -> tstack -> Set :=
 | TiNConst (s : tstack) (nat : nat) : tinstr s (Nat :: s)
 | TiBConst (s : tstack) (bool : bool) : tinstr s (Bool :: s)
 | TiBinop arg1 arg2 res s : tbinop arg1 arg2 res ->
-  tinstr (arg1 :: arg2 :: s) (res :: s).
+  tinstr (arg1 :: arg2 :: s) (res :: s). *)
 
-(* Inductive tinstr : tstack -> tstack -> Set :=
-| TiNConst : forall s, nat -> tinstr s (Nat :: s)
-| TiBConst : forall s, bool -> tinstr s (Bool :: s)
+Inductive tinstr : tstack -> tstack -> Set :=
+(* | TiNConst : forall s, nat -> tinstr s (Nat :: s)
+| TiBConst : forall s, bool -> tinstr s (Bool :: s) *)
 | TiBinop : forall arg1 arg2 res s,
   tbinop arg1 arg2 res
-  -> tinstr (arg1 :: arg2 :: s) (res :: s). *)
+  -> tinstr (arg1 :: arg2 :: s) (res :: s).
 
 Inductive tprog : tstack -> tstack -> Set :=
 | TNil : forall s, tprog s s
@@ -227,13 +227,13 @@ Print unit.
 
 Definition tinstrDenote ts ts' (i : tinstr ts ts') : vstack ts -> vstack ts' :=
   match i with
-    | TiNConst _ n => fun s => (n, s)
-    | TiBConst _ b => fun s => (b, s)
-    | TiBinop _ _ _ _ b => fun s =>
+    (* | TiNConst _ n => fun s => (n, s)
+    | TiBConst _ b => fun s => (b, s) *)
+    (* | TiBinop _ _ _ _ b => fun s =>
       let '(arg1, (arg2, s')) := s in
-        ((tbinopDenote b) arg1 arg2, s')
-    (* | TiBinop _ _ _ _ b => fun arg1 => fun arg2 => fun s' =>
-      ((tbinopDenote b) arg1 arg2, s') *)
+        ((tbinopDenote b) arg1 arg2, s') *)
+    | TiBinop _ _ _ _ b => fun arg1 arg2 s' =>
+      ((tbinopDenote b) arg1 arg2, s')
   end.
 
 Fixpoint tprogDenote ts ts' (p : tprog ts ts') : vstack ts -> vstack ts' :=
