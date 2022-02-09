@@ -232,9 +232,10 @@ Definition tinstrDenote ts ts' (i : tinstr ts ts') : vstack ts -> vstack ts' :=
     (* | TiBinop _ _ _ _ b => fun s =>
       let '(arg1, (arg2, s')) := s in
         ((tbinopDenote b) arg1 arg2, s') *)
-    | TiBinop _ _ _ _ b => fun arg1 arg2 s' =>
+    | TiBinop _ _ _ _ b => fun arg1 => fun arg2 => fun s' =>
       ((tbinopDenote b) arg1 arg2, s')
   end.
+
 
 Fixpoint tprogDenote ts ts' (p : tprog ts ts') : vstack ts -> vstack ts' :=
   match p with
