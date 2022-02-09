@@ -2,6 +2,30 @@ Require Import Bool Arith List Cpdt.CpdtTactics.
 Set Implicit Arguments.
 Set Asymmetric Patterns.
 
+Inductive binop : Set :=
+| Plus
+| Times.
+
+Definition binopDenote (b : binop) : nat -> nat -> nat :=
+match b with
+| Plus => plus
+| Times => mult
+end.
+
+Inductive exp : Set :=
+| Const : nat -> exp
+| Binop : exp -> exp -> binop -> exp.
+
+Fixpoint expDenote (e : exp) : nat :=
+match e with
+| Const n => n
+| Binop e1 e2 b => (binopDenote b) (expDenote e1) (expDenote e2)
+end.
+
+Inductive instr : Set :=
+| iConst : nat -> instr
+| iBinop : binop -> instr.
+
 Inductive type : Set := Nat | Bool.
 
 Definition typeDenote (t : type) : Set :=
