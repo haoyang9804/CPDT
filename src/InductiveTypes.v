@@ -320,6 +320,9 @@ Fixpoint plus_recursive (n : nat) : nat -> nat :=
     | S n' => fun m => S (plus_recursive n' m)
   end.
 
+Print plus_recursive.
+Print nat_rec.
+
 Definition plus_rec : nat -> nat -> nat :=
   nat_rec (fun _ : nat => nat -> nat) (fun m => m) (fun _ r m => S (r m)).
 
@@ -471,6 +474,9 @@ Restart.
     destruct LS; crush.
   induction tr1 using nat_tree_ind'; crush.
 Qed.
+
+Print red.
+Locate red.
 
 Theorem true_neq_false : true <> false.
   red.
